@@ -26,7 +26,7 @@ const emailCreateUser = async (name, userEmail, token) => {
     // Definir el asunto y mensaje del correo
     const subject = 'Activar tu Cuenta';
     const message = `${name}, te damos la bienvenida a nuestra plataforma. Haz clic en el siguiente enlace para activar tu cuenta: 
-    <a href="${process.env.BACKEND_URL}/confirm-user/${token}">Activar cuenta</a>`;
+    <a href="${process.env.FRONTEND_URL}/confirm-user/${token}">Activar cuenta</a>`;
 
     // Función para el envío del correo
     await transporter.sendMail({
@@ -34,7 +34,7 @@ const emailCreateUser = async (name, userEmail, token) => {
       from: '"Soporte: Registro de Usuario" <joannywerner@gmail.com>', // Remitente
       to: userEmail, // Dirección de correo del usuario
       subject: subject, // Asunto del correo
-      text: `${name}, te damos la bienvenida a nuestra plataforma. Haz clic en el siguiente enlace para activar tu cuenta: ${process.env.BACKEND_URL}/confirm-user/${token}`, // Texto plano como respaldo
+      text: `${name}, te damos la bienvenida a nuestra plataforma. Haz clic en el siguiente enlace para activar tu cuenta: ${process.env.FRONTEND_URL}/confirm-user/${token}`, // Texto plano como respaldo
       html: `<p>${message}</p>`, // HTML del cuerpo del correo
 
     });

@@ -26,7 +26,7 @@ const emailRecoverPassword = async (name, userEmail, token) => {
     // Definir el asunto y mensaje del correo
     const subject = 'Recuperar tu Contraseña';
     const message = `${name}, el equipo de soporte te ha enviado el siguiente enlace para que recuperes tu contraseña: 
-    <a href="${process.env.BACKEND_URL}/recover-password/${token}">Recuperar Contraseña</a>`;
+    <a href="${process.env.FRONTEND_URL}/recover-password/${token}">Recuperar Contraseña</a>`;
 
     // Función para el envío del correo
     await transporter.sendMail({
@@ -34,7 +34,7 @@ const emailRecoverPassword = async (name, userEmail, token) => {
       from: '"Soporte: Recuperar la Contraseña" <joannywerner@gmail.com>', // Remitente
       to: userEmail, // Dirección de correo del usuario
       subject: subject, // Asunto del correo
-      text: `${name}, el equipo de soporte te ha enviado el siguiente enlace para que recuperes tu contraseña: ${process.env.BACKEND_URL}/recover-password/${token}`, // Texto plano como respaldo
+      text: `${name}, el equipo de soporte te ha enviado el siguiente enlace para que recuperes tu contraseña: ${process.env.FRONTEND_URL}/recover-password/${token}`, // Texto plano como respaldo
       html: `<p>${message}</p>`, // HTML del cuerpo del correo
 
     });
