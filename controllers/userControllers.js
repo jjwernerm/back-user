@@ -271,7 +271,7 @@ const POSTrecoverPasswordNew = async (req, res) => {
 
     // Responder al cliente
     res.status(201).json({
-      msg: 'Contraseña recuperada con éxito, espera unos segundos para iniciar sesión',
+      msg: 'Nueva contraseña creada con éxito',
     });
 
   } catch (error) {
