@@ -62,12 +62,14 @@ const readUser = async (findOneEmail, password, res) => {
   };
 
   if (await findOneEmail.checkPassword(password)) {
+
     res.json({
-      //     _id: usuario._id,
-      //     nombre: usuario.nombre,
-      //     email: usuario.email,
-      bearerToken: jwtHelpers(findOneEmail.id),
+      _id: findOneEmail._id,
+      name: findOneEmail.name,
+      email: findOneEmail.email,
+      bearer_token: jwtHelpers(findOneEmail.id),
     });
+
   } else {
     throw new Error(`La contraseña es incorrecta, intenta de nuevo: 401 Unauthorized`);
   };
@@ -199,7 +201,7 @@ const GETdashboardUser = (req, res) => {
 
   const { user } = req;
 
-  res.json(`¡Hola! ${user.name}`);
+  res.json(user);
 
 };
 

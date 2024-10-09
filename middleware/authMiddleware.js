@@ -5,7 +5,7 @@ import userModels from '../models/userModels.js';
 const authMiddleware = async (req, res, next) => {
 
   // Inicializa una variable para almacenar el token si está presente en los headers de la petición.
-  let token;
+  let bearer_token;
 
   // Verifica si la petición contiene un header de autorización y si éste comienza con "Bearer".
   if (req.headers.authorization &&
@@ -14,14 +14,14 @@ const authMiddleware = async (req, res, next) => {
     try {
 
       // Extrae el token de la cabecera de autorización (separado después de "Bearer").
-      token = req.headers.authorization.split(" ")[1];
+      bearer_token = req.headers.authorization.split(" ")[1];
 
       // Verifica el token usando la clave secreta (almacenada en las variables de entorno).
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
+      const decoded = jwt.verify(bearer_token, process.env.JWT_SECRET);
 
       // Busca al usuario en la base de datos usando el ID decodificado del token.
       // Selecciona todos los campos excepto la contraseña, el token y si está confirmado.
-      req.user = await userModels.findById(decoded.id).select( '-password -token -confirmado' );
+      req.user = await userModels.findById(decoded.id).select( '-password -token -confirm -__v' );
 
       // Llama a la siguiente función o middleware si la autenticación fue exitosa.
       return next();
@@ -36,7 +36,7 @@ const authMiddleware = async (req, res, next) => {
   };
 
   // Si no se encontró ningún token en los headers, se responde con un error de token inexistente.
-  if (!token) {
+  if (!bearer_token) {
     const error = new Error('Token inexistente');
     res.status(403).json({ msg: error.message });
   };
