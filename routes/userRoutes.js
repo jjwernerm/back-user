@@ -1,15 +1,21 @@
 import express from 'express';
 
-import { 
+import {
+  // Public Area 
   POSTcreateUser,
   POSTreadUser,
-  // updateUser,
-  // deleteUser,
-  GETconfirmUser,
-  GETdashboardUser,
+  GETconfirmUser,  
   POSTrecoverPasswordEmail,
   GETrecoverPasswordToken,
   POSTrecoverPasswordNew,
+
+  // Private Area
+  GETdashboardUser,
+  GETuserInformation,
+  PUTupdateUser,
+  POSTverifyPassword,
+  PUTupdatePassword,
+  DELETEdeleteUser,  
 } from '../controllers/userControllers.js';
 
 import authMiddleware from '../middleware/authMiddleware.js';
@@ -24,10 +30,12 @@ router.post('/recover-password', POSTrecoverPasswordEmail);
 router.get('/recover-password/:token', GETrecoverPasswordToken);
 router.post('/recover-password/:token', POSTrecoverPasswordNew);
 
-// Private Routes 
+// Private Routes
 router.get('/dashboard', authMiddleware, GETdashboardUser);
-
-// router.put('/update/:id', checkAuth, updateUser); // Private Routes
-// router.delete('/delete/:id', checkAuth, deleteUser); // Private Routes
+router.get('/information/:id', authMiddleware, GETuserInformation); 
+router.put('/update/:id', authMiddleware, PUTupdateUser);
+router.post('/verify-password/:id', authMiddleware, POSTverifyPassword);
+router.put('/update-password/:id', authMiddleware, PUTupdatePassword);
+router.delete('/delete/:id', authMiddleware, DELETEdeleteUser);
 
 export default router;
