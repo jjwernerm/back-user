@@ -1,99 +1,71 @@
 import jwt from 'jsonwebtoken';
+// Importa jsonwebtoken para generar, decodificar y verificar tokens JWT.
+
 import userModels from '../models/userModels.js';
+// Importa el modelo de usuarios para interactuar con la base de datos.
 
 const authMiddleware = async (req, res, next) => {
-  let bearer_token;
+  // Middleware para autenticar rutas protegidas.
+
+  let bearer_token; 
+  // Declara una variable para almacenar el token extraído de los headers.
+
   if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    // Verifica si existe un encabezado de autorización y si comienza con "Bearer".
+
     try {
       bearer_token = req.headers.authorization.split(" ")[1];
-      
-      // Decodifica y verifica el token
-      const decoded = jwt.verify(bearer_token, process.env.JWT_SECRET);
+      // Extrae el token eliminando la palabra "Bearer".
 
-      // Busca al usuario por el ID decodificado
+      const decoded = jwt.verify(bearer_token, process.env.JWT_SECRET);
+      // Decodifica y verifica el token usando la clave secreta del servidor.
+
       req.user = await userModels.findById(decoded.id).select('-password -token -confirm -__v');
-      
+      // Busca al usuario en la base de datos usando el ID decodificado.
+      // Excluye campos sensibles como la contraseña, el token y otros datos innecesarios.
+
       if (!req.user) {
+        // Si el usuario no existe, envía una respuesta de error.
         return res.status(404).json({ msg: 'Usuario no encontrado' });
       }
-      
-      next(); // Continua al siguiente middleware si el token es válido
+
+      next(); 
+      // Si todo es válido, continúa hacia el siguiente middleware o controlador.
 
     } catch (error) {
+      // Maneja errores en la verificación del token o problemas con la base de datos.
 
       return res.status(403).json({ msg: 'Bearer Token no válido: 401 Unauthorized' });
+      // Envía un error 403 indicando que el token no es válido.
     }
   } else {
+    // Si no hay token en el encabezado de autorización, envía un error.
 
     return res.status(403).json({ msg: 'Token inexistente' });
+    // Responde con un error indicando que no se proporcionó un token.
   }
 };
 
 export default authMiddleware;
+// Exporta el middleware para que pueda ser utilizado en las rutas protegidas.
 
 
+// Propósito:
+// Este archivo define un middleware para proteger rutas que requieren autenticación.
 
-// import jwt from 'jsonwebtoken';
-// import userModels from '../models/userModels.js';
+// Validación del token:
+//  -Verifica si el token JWT está presente en el encabezado Authorization.
+//  -Decodifica el token y obtiene el ID del usuario.
+//  -Usa el ID para buscar al usuario en la base de datos.
 
-// // Función middleware de autenticación que se ejecuta antes de acceder a ciertas rutas protegidas.
-// const authMiddleware = async (req, res, next) => {
+// Protección de rutas:
+//  -Permite el acceso solo si el token es válido y el usuario existe en la base de datos.
+//  -Bloquea solicitudes no autorizadas o con tokens inválidos.
 
-//   // Inicializa una variable para almacenar el token si está presente en los headers de la petición.
-//   let bearer_token;
+// Respuestas:
+//  -Devuelve errores 403 o 404 según el caso:
+//  -403: Token inexistente o no válido.
+//  -404: Usuario no encontrado.
 
-//   // Verifica si la petición contiene un header de autorización y si éste comienza con "Bearer".
-//   if (req.headers.authorization &&
-//     req.headers.authorization.startsWith('Bearer')) {
-
-//     try {
-
-//       // Extrae el token de la cabecera de autorización (separado después de "Bearer").
-//       bearer_token = req.headers.authorization.split(" ")[1];
-
-//       // Verifica el token usando la clave secreta (almacenada en las variables de entorno).
-//       const decoded = jwt.verify(bearer_token, process.env.JWT_SECRET);
-
-//       // Busca al usuario en la base de datos usando el ID decodificado del token.
-//       // Selecciona todos los campos excepto la contraseña, el token y si está confirmado.
-//       req.user = await userModels.findById(decoded.id).select( '-password -token -confirm -__v' );
-
-//       // Llama a la siguiente función o middleware si la autenticación fue exitosa.
-//       return next();
-
-//     } catch (error) {
-
-//       // Si hay un error (como un token no válido o expirado), se lanza un mensaje de error.
-//       const e = new Error('Bearer Token no válido: 401 Unauthorized');
-//       return res.status(403).json({ msg: e.message });
-
-//     };
-//   };
-
-//   // Si no se encontró ningún token en los headers, se responde con un error de token inexistente.
-//   if (!bearer_token) {
-//     const error = new Error('Token inexistente');
-//     res.status(403).json({ msg: error.message });
-//   };
-
-//   // Si todo está correcto, pasa al siguiente middleware o función de la ruta.
-//   next();
-// };
-
-// // Exporta el middleware para que pueda ser usado en otros archivos.
-// export default authMiddleware;
-
-// // ↓ Resumen ↓
-// // El middleware se encarga de verificar si el cliente que realiza la petición ha enviado un token JWT en la cabecera de autorización y si este token es válido. JWT (JSON Web Token): Es un estándar para transmitir información entre dos partes (cliente y servidor) de manera segura a través de un token firmado. En este caso, se utiliza para autenticar al usuario.
-
-// // ↓ Función del Middleware ↓
-// // 1. Revisa si la petición incluye un token de tipo Bearer en los headers.
-// // 2. Si el token está presente, lo verifica usando una clave secreta.
-// // 3. Si el token es válido, busca al usuario correspondiente en la base de datos y excluye ciertos campos confidenciales (contraseña, token de confirmación, etc.).
-// // 4. Si todo es correcto, permite que la petición continúe hacia la ruta protegida.
-// // 5. Si el token es inválido o no está presente, devuelve un error 403 (prohibido) con un mensaje apropiado.
-
-// // ↓ Importancia ↓
-// // Seguridad: Este middleware asegura que solo los usuarios autenticados puedan acceder a ciertas rutas o recursos protegidos de la API.
-// // Protección de rutas: Es crucial en aplicaciones que requieren que los usuarios inicien sesión o proporcionen pruebas de autenticación para realizar ciertas acciones, como ver perfiles, hacer pedidos, etc.
-// // Eficiencia: Permite que las rutas protegidas verifiquen la autenticidad del usuario de manera automatizada sin necesidad de hacerlo manualmente en cada controlador.
+// Importancia:
+// Este middleware es esencial para controlar el acceso a las rutas protegidas de tu aplicación, asegurando que solo usuarios autenticados puedan realizar ciertas acciones.
