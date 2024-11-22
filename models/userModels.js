@@ -27,7 +27,6 @@ const userSchema = mongoose.Schema({
   },
   token: {
     type: String,       // El token es un string.
-    default: tokenHelpers(), // Se genera automáticamente con la función `tokenHelpers`.
   },
   confirm: {
     type: Boolean,      // Este campo indica si el usuario está confirmado.
@@ -41,20 +40,27 @@ const userSchema = mongoose.Schema({
     type: String,       // Teléfono del usuario (opcional).
     trim: true          // Elimina espacios en blanco al inicio y al final.
   },
+
 });
 
-// Método para hashear el password antes de guardar un usuario.
-userSchema.pre('save', async function(next) {
-  if(!this.isModified('password')) {
-    // Si la contraseña no ha sido modificada, pasa al siguiente middleware.
-    next();
+userSchema.pre('save', async function (next) {
+  // Genera un token único si no existe
+  if (!this.token) {
+    this.token = tokenHelpers();
   };
 
-  const salt = await bcrypt.genSalt(10);
-  // Genera un "salt" (valor aleatorio) para el hash.
+  // Hashea la contraseña solo si ha sido modificada
+  if (this.isModified('password')) {
+    try {
+      const salt = await bcrypt.genSalt(10); // Genera el salt
+      this.password = await bcrypt.hash(this.password, salt); // Hashea la contraseña
+    } catch (error) {
+      throw new Error(error);
+    };
+  };
 
-  this.password = await bcrypt.hash(this.password, salt);
-  // Hashea la contraseña y la almacena en el campo `password`.
+  next(); // Finaliza el middleware correctamente
+
 });
 
 // Método que compara la contraseña ingresada con la almacenada en la base de datos.
@@ -78,3 +84,8 @@ export default user;
 // -Generación de tokens: Asigna un token único a los usuarios de manera predeterminada.
 
 // Este modelo es esencial para gestionar usuarios, validar credenciales y proteger información sensible como contraseñas.
+
+// Incorporación del try-catch:
+// Se asegura que cualquier error durante el proceso de hasheo (como problemas con bcrypt) sea capturado y manejado adecuadamente.
+// Sin try-catch, cualquier error en el hasheo podría haber interrumpido el middleware, dejando la contraseña sin procesar.
+// Por ejemplo, si había un problema en la conexión a la base de datos o en la configuración de Mongoose, podría haber evitado que el código del pre('save') se completara correctamente.
