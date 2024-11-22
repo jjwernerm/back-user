@@ -450,7 +450,7 @@ const PUTupdatePassword = async (req, res) => {
     // Busca al usuario en la base de datos utilizando el ID proporcionado.
 
     // Se pasa 'user' a la función 'updatedPassword'
-    updatedPassword(user, req);
+    await updatedPassword(user, req);
     // Llama a la función `updatedPassword` para actualizar la contraseña del usuario con la nueva contraseña proporcionada en la solicitud.
 
     // Responder al cliente con un mensaje de éxito
